@@ -45,7 +45,8 @@ MongoClient.connect(`mongodb://localhost:27017/${dbName}`, (err, client) => {
       },
       { returnOriginal: false }
     )
-    .then(result => console.log(result));
+    .then(result => console.log(result))
+    .catch(e => console.log(e));
 
   //client.close();
 });
