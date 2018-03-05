@@ -12,7 +12,9 @@ const todos = [
   },
   {
     _id: new ObjectID(),
-    text: "second test todo"
+    text: "second test todo",
+    completed: true,
+    completedAt: 2424
   }
 ];
 
@@ -142,5 +144,53 @@ describe("DELETE /todos:id", () => {
       .delete(`/todos/123`)
       .expect(404)
       .end(done);
+  });
+});
+
+describe("PATCH /todo:id", () => {
+  it("should update the todo", done => {
+    const text = "Test text";
+    const completed = true;
+    const hexID = todos[1]._id.toHexString();
+    request(app)
+      .patch(`/todos/${hexID}`)
+      .send({ text, completed })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        //Query database for this todo.
+        Todo.findById(hexID)
+          .then(todo => {
+            expect(todo.text).toEqual(text);
+            expect(todo.completed).toBe(true);
+            expect(typeof todo.completedAt).toBe("number");
+            done();
+          })
+          .catch(err => done(err));
+      });
+  });
+
+  //Note how here the db is tested on the END method of supertest.
+  //This test can also be done on the response,
+  it("should clear completedAt when todo is not completed", done => {
+    const text = "Test text";
+    const completed = false;
+    const hexID = todos[1]._id.toHexString();
+    request(app)
+      .patch(`/todos/${hexID}`)
+      .send({ text, completed })
+      .expect(200)
+      .end((err, res) => {
+        if (err) return done(err);
+        //Query database for this todo.
+        Todo.findById(hexID)
+          .then(todo => {
+            expect(todo.text).toEqual(text);
+            expect(todo.completed).toEqual(false);
+            expect(todo.completedAt).toBeNull();
+            done();
+          })
+          .catch(err => done(err));
+      });
   });
 });
