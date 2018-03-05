@@ -1,4 +1,4 @@
-//Production environment will be automatically picked up by heroku.
+//Production environment will be automatically picked up by heroku, as both if statements will fail.
 
 var env = process.env.NODE_ENV || "development";
 
