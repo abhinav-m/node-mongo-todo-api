@@ -171,7 +171,7 @@ describe("PATCH /todo:id", () => {
   });
 
   //Note how here the db is tested on the END method of supertest.
-  //This test can also be done on the response,
+  //This test can also be done on the response,BEFORE .end is called.
   it("should clear completedAt when todo is not completed", done => {
     const text = "Test text";
     const completed = false;
