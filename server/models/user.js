@@ -36,6 +36,7 @@ var UserSchema = new mongoose.Schema({
 
 //Overriding mongoose toJSON method for this SCHEMA so that when user is converted to JSON,
 //It will only contain properties email and id
+//Instance method
 UserSchema.methods.toJSON = function() {
   var user = this;
   //Turn mongoose variable to normal object.
@@ -54,6 +55,23 @@ UserSchema.methods.generateAuthToken = function() {
   user.tokens = user.tokens.concat([{ access, token }]);
   return user.save().then(() => {
     return token;
+  });
+};
+
+UserSchema.statics.findByToken = function(token) {
+  var User = this;
+  var decoded;
+  try {
+    decoded = jwt.verify(token, "abcd123");
+  } catch (e) {
+    // return new Promise((resolve, reject) => reject());
+    return Promise.reject(); // same as above.
+  }
+
+  return User.findOne({
+    _id: decoded._id,
+    "tokens.token": token,
+    "tokens.access": "auth"
   });
 };
 

@@ -8,6 +8,7 @@ const _ = require("lodash");
 const { Todo } = require("./models/todo");
 const { User } = require("./models/user");
 const { mongoose } = require("./db/mongoose");
+const { authenticate } = require("./middleware/authenticate");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -115,6 +116,13 @@ app.post("/users", (req, res) => {
       res.header("x-auth", token).send(user);
     })
     .catch(e => res.status(400).send(e));
+});
+
+//Middleware code for authenticated routes.
+
+//Passing in the middleware to this route so it handles authentication by itself.
+app.get("/users/me", authenticate, (req, res) => {
+  res.send(req.user);
 });
 
 app.listen(port, () => {
