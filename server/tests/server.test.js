@@ -217,11 +217,13 @@ describe("POST /users", () => {
       })
       .end(err => {
         if (err) return done(err);
-        User.findOne({ email }).then(user => {
-          expect(user).not.toBeNull();
-          expect(user.password).not.toEqual(password);
-          done();
-        });
+        User.findOne({ email })
+          .then(user => {
+            expect(user).not.toBeNull();
+            expect(user.password).not.toEqual(password);
+            done();
+          })
+          .catch(e => done(e));
       });
   });
 
@@ -239,5 +241,56 @@ describe("POST /users", () => {
       .send({ email: users[0].email, password: users[0].password })
       .expect(400)
       .end(done);
+  });
+});
+
+describe("POST /users/login", () => {
+  it("should login users and return auth token", done => {
+    request(app)
+      .post("/users/login")
+      .send({ email: users[1].email, password: users[1].password })
+      .expect(200)
+      .expect(res => {
+        expect(res.headers["x-auth"]).toBeDefined();
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        }
+        User.findById(users[1]._id)
+          .then(user => {
+            expect(user.tokens[0]).toEqual(
+              expect.objectContaining({
+                access: "auth",
+                token: res.headers["x-auth"]
+              })
+            );
+            done();
+          })
+          .catch(e => done(e));
+      });
+  });
+
+  it("should reject users with bad login credentials", done => {
+    request(app)
+      .post("/users/login")
+      .send({ email: users[1].email, password: "passwsord" })
+      .expect(400)
+      .expect(res => {
+        expect(res.headers["x-auth"]).not.toBe(expect.anything());
+      })
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        }
+        User.findById(users[1]._id)
+          .then(user => {
+            //User will still exist due to seed data being populated, and token will be empty because it was not generated due to invalid
+            //request, and it being present in the schema.
+            expect(user.tokens.length).toBe(0);
+            done();
+          })
+          .catch(e => done(e));
+      });
   });
 });
