@@ -110,6 +110,7 @@ UserSchema.pre("save", function(next) {
 
 UserSchema.methods.removeToken = function(token) {
   var user = this;
+  //The $pull operator removes from an existing array all instances of a value or values that match a specified condition.
 
   return user.update({
     $pull: {

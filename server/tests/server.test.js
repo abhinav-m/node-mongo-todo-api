@@ -294,3 +294,24 @@ describe("POST /users/login", () => {
       });
   });
 });
+
+describe("DELETE /users/me/token", () => {
+  it("should remove auth token on logout", done => {
+    request(app)
+      .delete("/users/me/token")
+      .set("x-auth", users[0].tokens[0].token)
+      .expect(200)
+      .end((err, res) => {
+        if (err) {
+          done(err);
+        }
+        //As we delete the whole token element using pull, length will be 0.
+        User.findById(users[0]._id)
+          .then(user => {
+            expect(user.tokens.length).toBe(0);
+            done();
+          })
+          .catch(e => done(e));
+      });
+  });
+});
