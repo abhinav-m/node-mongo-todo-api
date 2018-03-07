@@ -123,7 +123,7 @@ describe("DELETE /todos:id", () => {
         //query database using findById
         Todo.findById(hexID)
           .then(todo => {
-            expect(todo).toBeNull();
+            expect(todo).toBeFalsy();
             done();
           })
           .catch(e => done(e));
@@ -142,7 +142,7 @@ describe("DELETE /todos:id", () => {
         //query database using findById
         Todo.findById(hexID)
           .then(todo => {
-            expect(todo).not.toBeNull();
+            expect(todo).toBeTruthy();
             done();
           })
           .catch(e => done(e));
@@ -221,7 +221,7 @@ describe("PATCH /todo:id", () => {
           .then(todo => {
             expect(todo.text).toEqual(text);
             expect(todo.completed).toEqual(false);
-            expect(todo.completedAt).toBeNull();
+            expect(todo.completedAt).toBeFalsy();
             done();
           })
           .catch(err => done(err));
@@ -262,15 +262,16 @@ describe("POST /users", () => {
       .send({ email, password })
       .expect(200)
       .expect(res => {
-        expect(res.headers["x-auth"]).toBeDefined();
+        expect(res.headers["x-auth"]).toBeTruthy();
+        expect(res.body._id).toBeTruthy();
         expect(res.body.email).toEqual(email);
       })
       .end(err => {
         if (err) return done(err);
         User.findOne({ email })
           .then(user => {
-            expect(user).not.toBeNull();
-            expect(user.password).not.toEqual(password);
+            expect(user).toBeTruthy();
+            expect(user.password).not.toBe(password);
             done();
           })
           .catch(e => done(e));
@@ -301,7 +302,7 @@ describe("POST /users/login", () => {
       .send({ email: users[1].email, password: users[1].password })
       .expect(200)
       .expect(res => {
-        expect(res.headers["x-auth"]).toBeDefined();
+        expect(res.headers["x-auth"]).toBeTruthy();
       })
       .end((err, res) => {
         if (err) {
@@ -327,7 +328,7 @@ describe("POST /users/login", () => {
       .send({ email: users[1].email, password: "passwsord" })
       .expect(400)
       .expect(res => {
-        expect(res.headers["x-auth"]).not.toBe(expect.anything());
+        expect(res.headers["x-auth"]).toBeFalsy();
       })
       .end((err, res) => {
         if (err) {
